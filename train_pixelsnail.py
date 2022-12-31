@@ -2,6 +2,7 @@ import argparse
 
 import numpy as np
 import torch
+from torchinfo import summary
 from torch import nn, optim
 from torch.utils.data import DataLoader
 from tqdm import tqdm
@@ -82,6 +83,7 @@ if __name__ == '__main__':
     parser.add_argument('--amp', type=str, default='O0')
     parser.add_argument('--sched', type=str)
     parser.add_argument('--ckpt', type=str)
+    parser.add_argument('--size', type=int, default=256)
     parser.add_argument('path', type=str)
 
     args = parser.parse_args()
@@ -102,8 +104,9 @@ if __name__ == '__main__':
         args = ckpt['args']
 
     if args.hier == 'top':
+        scale = args.size // 8
         model = PixelSNAIL(
-            [32, 32],
+            [scale, scale],
             512,
             args.channel,
             5,
@@ -115,8 +118,9 @@ if __name__ == '__main__':
         )
 
     elif args.hier == 'bottom':
+        scale = args.size // 4
         model = PixelSNAIL(
-            [64, 64],
+            [scale, scale],
             512,
             args.channel,
             5,
@@ -133,6 +137,7 @@ if __name__ == '__main__':
         model.load_state_dict(ckpt['model'])
 
     model = model.to(device)
+    summary(model, input_size=(args.batch, scale, scale))
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
 
     if amp is not None:

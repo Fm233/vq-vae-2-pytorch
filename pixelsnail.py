@@ -398,6 +398,7 @@ class PixelSNAIL(nn.Module):
         if cache is None:
             cache = {}
         batch, height, width = input.shape
+        input = input.to(torch.int64)
         input = (
             F.one_hot(input, self.n_class).permute(0, 3, 1, 2).type_as(self.background)
         )
