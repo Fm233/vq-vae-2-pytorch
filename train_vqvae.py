@@ -144,13 +144,16 @@ def main(args):
     if (args.optimizer_checkpoint != ""):
         optimizer_checkpoint = torch.load(args.optimizer_checkpoint)
         optimizer.load_state_dict(optimizer_checkpoint)
+        print("[DEBUG] Loaded optimizer checkpoint")
 
     if (args.checkpoint != ""):
         checkpoint = torch.load(args.checkpoint)
         model.load_state_dict(checkpoint)
+        print("[DEBUG] Loaded checkpoint")
 
     if (args.args_checkpoint != ""):
         args = torch.load(args.args_checkpoint)
+        print("[DEBUG] Loaded args checkpoint")
 
     scheduler = None
     if args.sched == "cycle":
@@ -163,9 +166,10 @@ def main(args):
         )
 
     current_epoch = args.current_epoch
+    model.train()
 
     for i in range(current_epoch - 1, args.epoch):
-        args.current_epoch = i + 1
+        args.current_epoch = i + 2
         train(i, loader, model, optimizer, scheduler, device, args, writer)
 
         if dist.is_primary():
@@ -191,9 +195,9 @@ if __name__ == "__main__":
     parser.add_argument("--sched", type=str)
     parser.add_argument("--path", type=str, default="~/data/ffhq64/")
     parser.add_argument("--logdir", type=str, default="logs")
-    parser.add_argument("--optimizer-checkpoint", type=str, default="pt/optim_024.pt")
-    parser.add_argument("--args-checkpoint", type=str, default="pt/args_024.pt")
-    parser.add_argument("--checkpoint", type=str, default="pt/vqvae_024.pt")
+    parser.add_argument("--optimizer-checkpoint", type=str, default="pt/optim_172.pt")
+    parser.add_argument("--args-checkpoint", type=str, default="pt/args_172.pt")
+    parser.add_argument("--checkpoint", type=str, default="pt/vqvae_172.pt")
 
     args = parser.parse_args()
     args.steps = 0
